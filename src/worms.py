@@ -350,9 +350,12 @@ def getOpt():
                         metavar='spps_file',
                         default=None,
                         help='Target species in plain text')
+    parser.add_argument('-id',
+                        action='store_true',
+                        help='Get aphiaIDs')
     parser.add_argument('-val',
                         action='store_true',
-                        help='Get Length-Weight relationships')
+                        help='Get validated names')
     parser.add_argument('-syn',
                         action='store_true',
                         help='Get species synonyms')
@@ -369,6 +372,27 @@ def getOpt():
 
     return args
 
+def wformat(f, k):
+    # f = file
+    f = list(filter(None, f))
+
+    if not f:
+        print("\nEmpty file\n")
+        exit()
+
+    we = "%{}s".format(sorted([list(i).__len__() for i in f])[-1])
+    ne = "%{}s".format(str(len(f)).__len__())
+
+    if k == "general":
+        return "%s. %s" % (ne, we)
+
+    elif k == "validation":
+
+        notval = "%s. not validated: %s" % (ne, we)
+        val = "%s. validated:     %s -> %s" % (ne, we, we)
+
+        return val, notval
+
 def cname(s, ty):
 
     tail = "_worms_%s.tsv" % ty
@@ -384,33 +408,84 @@ def modName(s):
     spps0 = rmAcc(spps0)
     return spps0
 
+def msgFirstL(s, a):
+
+    if a is None:
+        msg = "\nGetting %s:\n" % s
+        firstL = "species\t%s\tObs\n" % s
+    else:
+        msg = "\nGetting %s and adding taxonomical ranks:\n" % s
+        firstL = "%s\tspecies\t%s\tObs\n" % ("\t".join(a), s)
+
+    return msg, firstL
+
+def rankStr(c, o, a, i=None):
+    # c, o, a, i = (spps_v, wObj, ['Class'], OutStr)
+    if not c:
+        rs = "\t".join([''] * len(a))
+    else:
+        rs = "\t".join([o.get_rank(ii) for ii in a])
+
+    if i is None:
+        return rs
+
+    else:
+        if isinstance(i, str):
+            i = [i]
+
+        rs = [rs] + i
+
+        return "\t".join(rs)
+
 def main():
     options = vars(getOpt())
     # print(options)
     file = open( options['spps'], 'r' ).read().split("\n")
 
-    if options['val']:
+    if options['id']:
 
-        if options['at'] is None:
-            msg = "\nValidating names:\n"
-        else:
-            msg = "\nValidating names and adding taxonomical ranks:\n"
+        fo = options['out'] + '_worms_aphiaID.tsv' if options['out'] != 'input_based' else cname(options['spps'], 'aphiaID')
+        pf = wformat(file, 'general')
 
+        msg, firstLine = msgFirstL('aphiaIDs', None)
         print(msg)
-
-        fo = options['out'] + '_worms_val.tsv' if options['out'] != 'input_based' else cname(options['spps'],'val')
-
-        if options['at'] is None:
-            firstLine = "Species\tValidation\tObs\n"
-
-        else:
-            firstLine = "%s\tSpecies\tValidation\tObs\n" % "\t".join(options['at'])
 
         f = open(fo, "w")
         f.write(firstLine)
-
         # file = open(options['spps']).read().split("\n")
+        for i in range(0, file.__len__()):
 
+            spps0 = file[i].replace("\n", "")
+            spps = modName(spps0)
+
+            if not spps:
+                continue
+
+            if re.findall(" sp[p\\.]{0,2}$", spps):
+                id = ''
+
+            else:
+                wObj = Worms(spps.lower())
+                id = wObj.aphiaID
+                time.sleep(0.5)
+
+            print(pf % (i + 1, spps0))
+
+            if not id:
+                f.write( '%s\t%s\t%s\n' % (spps0, '', 'Record not found in WoRMS') )
+            else:
+                f.write('%s\t%s\t%s\n' % (spps0, id, ''))
+
+    if options['val']:
+        fo = options['out'] + '_worms_val.tsv' if options['out'] != 'input_based' else cname(options['spps'], 'val')
+        pf1, pf2 = wformat(file, 'validation')
+
+        msg, firstLine = msgFirstL('validated names', options['at'])
+        print(msg)
+
+        f = open(fo, "w")
+        f.write(firstLine)
+        # file = open(options['spps']).read().split("\n")
         for i in range(0, file.__len__()):
             # i = 1
             spps0 = file[i].replace("\n", "")
@@ -431,42 +506,26 @@ def main():
             if not spps_v:
 
                 OutStr += '%s\t%s\t%s' % (spps0, '', 'Record not found in WoRMS')
-                print("%3s. not validated: %35s" % (i + 1, spps0))
+                print(pf2 % (i + 1, spps0))
             else:
 
                 OutStr += '%s\t%s\t%s' % (spps0, spps_v, '')
-                print("%3s. validated:     %35s -> %35s" % (i + 1, spps0, spps_v))
+                print(pf1 % (i + 1, spps0, spps_v))
 
             if options['at'] is not None:
 
-                if not spps_v:
-                    RankStr = "\t".join([''] * len(options['at']))
-
-                else:
-                    RankStr = "\t".join([wObj.get_rank(i) for i in options['at']])
-
-                OutStr = "%s\t%s" % (RankStr, OutStr)
+                OutStr = rankStr(spps_v, wObj, options['at'], OutStr)
 
             f.write(OutStr + '\n')
 
         f.close()
 
     if options['syn']:
-
-        if options['at'] is None:
-            msg = "\nGetting synonyms:\n"
-        else:
-            msg = "\nGetting synonyms and adding taxonomical ranks:\n"
-
-        print(msg)
-
         fo = options['out'] + '_worms_syn.tsv' if options['out'] != 'input_based' else cname(options['spps'],'syn')
+        pf = wformat(file, 'general')
 
-        if options['at'] is None:
-            firstLine = "Species\tSynonyms\tObs\n"
-
-        else:
-            firstLine = "%s\tSpecies\tSynonyms\tObs\n" % "\t".join(options['at'])
+        msg, firstLine = msgFirstL('synonyms', options['at'])
+        print(msg)
 
         f = open(fo, "w")
         f.write(firstLine)
@@ -481,18 +540,18 @@ def main():
                 continue
 
             if re.findall(" sp[p\\.]{0,2}$", spps):
-                syns = 'Check your taxon!'
-
+                syns = ''
             else:
 
-                wObj = Worms(spps.lower())
+                wObj = Worms(spps)
                 syns = wObj.get_synonyms()
                 time.sleep(0.5)
 
-            print("%3s. %35s" % (i + 1, spps0))
+            cc = '' if isinstance(syns, str) else 'in WoRMS'
+            print(pf % (i + 1, spps0))
 
             OutStr = ''
-            if isinstance(syns, str):
+            if not cc:
 
                 OutStr += '%s\t%s\t%s' % (spps0, '', 'Record not found in WoRMS')
             else:
@@ -510,13 +569,7 @@ def main():
 
             if options['at'] is not None:
 
-                if isinstance(syns, str):
-                    RankStr = "\t".join([''] * len(options['at']))
-
-                else:
-                    RankStr = "\t".join([wObj.get_rank(i) for i in options['at']])
-
-                OutStr = "%s\t%s" % (RankStr, OutStr)
+                OutStr = rankStr(cc,wObj,options['at'], OutStr)
 
             f.write(OutStr + '\n')
 
@@ -529,6 +582,7 @@ def main():
         print("\nAdding taxonomical ranks:\n")
 
         fo = options['out'] + '_worms_ranks.tsv' if options['out'] != 'input_based' else cname(options['spps'], 'ranks')
+        pf = wformat(file, 'general')
 
         firstLine = "%s\tSpecies\tObs\n" % "\t".join(options['at'])
 
@@ -536,9 +590,8 @@ def main():
         f.write(firstLine)
 
         for i in range(0, file.__len__()):
-            # i = 4
-            spps0 = file[i].replace("\n", "")
 
+            spps0 = file[i].replace("\n", "")
             # spps0 = "Alopias pelgicus"
             spps  = modName(spps0)
 
@@ -547,29 +600,27 @@ def main():
 
             if re.findall(" sp[p\\.]{0,2}$", spps):
                 tax_ranks = []
+
             else:
                 wObj = Worms(spps)
                 wObj.get_taxonomic_ranges()
                 tax_ranks = wObj.taxonomic_ranges
 
-            print("%3s. %35s" % (i + 1, spps0))
+            print(pf % (i + 1, spps0))
 
             if not tax_ranks:
-                RankStr = "\t".join([''] * len(options['at']))
-                f.write( '%s\t%s\t%s\n' % (RankStr, spps0, 'Record not found in WoRMS') )
+                so = "%s\t%s" % (spps0, 'Record not found in WoRMS')
 
             else:
-
-                RankStr = "\t".join([wObj.get_rank(i) for i in options['at']])
                 if wObj.accepted_name:
                     obs   = "deprecated name: %s" % spps0
                     spps0 = wObj.accepted_name
 
                 else:
                     obs = ''
+                so = "%s\t%s" % (spps0, obs)
 
-                f.write('%s\t%s\t%s\n' % (RankStr, spps0, obs) )
-
+            f.write( rankStr(tax_ranks, wObj, options['at'], so) + "\n" )
         f.close()
 
 if __name__ == '__main__':
