@@ -17,7 +17,7 @@ Using `git`:
 1. clone it: `git clone https://github.com/Ulises-Rosas/WoRMStools.git`
 2. move into:  `cd WoRMStools`
 
-### aphiaID
+### AphiaID
 
 We can obtain the species ID which WoRMS database identify a given species (i.e. aphiaID). If this ID is not known, then species cannot be validated or continue with downstream procedures. Therefore, to know species aphiaID is an important step towards getting metadata inside WoRMS database.
 
