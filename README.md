@@ -54,7 +54,7 @@ Pholoides tuberculata		Record not found in WoRMS
 
 ### Validate names
 
-Validated name according to WoRMS for each species can be obtained with the option `-val`. The output, when using this option, has the following columns: **species**, **validated names** and **obs**. If there were species that cannot be validated through WoRMS, it is stated on the **obs** column. 
+Currently accepted name according to WoRMS for each species can be obtained with the option `-val`. The output, when using this option, has the following columns: **species**, **validated names** and **obs**. If there were species that cannot be validated through WoRMS, it is stated on the **obs** column. 
 
 Example:
 ```Shell
