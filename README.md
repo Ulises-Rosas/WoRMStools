@@ -85,7 +85,7 @@ Lolliguncula (Lolliguncula) panamensis	Lolliguncula panamensis, Lolliguncula tyd
 Pholoides tuberculata		Record not found in WoRMS
 ```
 
-*\*While species that does not have an aphiaID can be either validated in order to get an aphiaID or simply skipped, it is highly recomendable to introduce a list of validated species (see above).*
+*\*While species that does not have an aphiaID can be either validated in order to get an aphiaID or simply skipped, it is highly recomendable to introduce a list of validated species (see how [here](https://github.com/Ulises-Rosas/WoRMStools#validate-names)).*
 
 ### Taxonomic rank
 
@@ -107,4 +107,4 @@ Cephalopoda	Loliginidae	Lolliguncula (Lolliguncula) panamensis	deprecated name: 
 
 Finally, this option can be used together with all above options.
 
-*\*While species that does not have an aphiaID can be either validated in order to get an aphiaID or simply skipped, it is highly recomendable to introduce a list of validated species (see above).*
+*\*While species that does not have an aphiaID can be either validated in order to get an aphiaID or simply skipped, it is highly recomendable to introduce a list of validated species (see how [here](https://github.com/Ulises-Rosas/WoRMStools#validate-names)).*
