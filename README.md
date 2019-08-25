@@ -1,4 +1,7 @@
+[![DOI](https://zenodo.org/badge/204058054.svg)](https://zenodo.org/badge/latestdoi/204058054)
+
 # WoRMStools
+
 
 Features:
 
