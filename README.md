@@ -13,7 +13,7 @@ Software requierements:
 
 #### Installation
 
-You can just downloading this repository, unzip it and move into `WoRMStools` directory. 
+Upon downloading this repository, unzip it and move into `WoRMStools` directory. Then you can run the following to install excutables: 
 ```Shell
 python3 setup.py install
 ```
