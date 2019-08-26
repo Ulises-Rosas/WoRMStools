@@ -13,12 +13,17 @@ Software requierements:
 
 #### Installation
 
-By the moment, there's no need of further steps to install WoRMStools. You can just download this repository, unzip it and move into main directory in order to get access to executables. 
+You can just downloading this repository, unzip it and move into `WoRMStools` directory. 
+```Shell
+python3 setup.py install
+```
 
 Using `git`:
-
-1. clone it: `git clone https://github.com/Ulises-Rosas/WoRMStools.git`
-2. move into:  `cd WoRMStools`
+```Shell
+git clone https://github.com/Ulises-Rosas/WoRMStools.git
+cd WoRMStools
+python3 setup.py install
+```
 
 ### AphiaID
 
@@ -39,7 +44,7 @@ Pholoides tuberculata
 ```
 We can obtain their aphiaIDs by running:
 ```Shell
-./src/worms.py species.txt -id
+worms.py species.txt -id
 ```
 By default worms.py uses its input to name all outputs, however this can be modified with `--out` option. Since we did not specify any output name, by default the output name is `species_worms_aphiaID.tsv` and is contains the following:
 
@@ -58,7 +63,7 @@ Currently accepted name according to WoRMS for each species can be obtained with
 
 Example:
 ```Shell
-./src/worms.py species.txt -val
+worms.py species.txt -val
 ```
 By default the output name is `species_worms_val.tsv` and is contains the following:
 ```
@@ -76,7 +81,7 @@ Synonyms of each species can be obtained with the option `-syn`. This option is 
 
 Example:
 ```Shell
-./src/worms.py species.txt -syn
+worms.py species.txt -syn
 ```
 By default the output name is `species_worms_syn.tsv` and is contains the following:
 ```
@@ -96,7 +101,7 @@ Different taxonomical categories can obtained with the option `--at`. This optio
 
 Example:
 ```Shell
-./src/worms.py species.txt --at Class Family
+worms.py species.txt --at Class Family
 ```
 By default the output name is `species_worms_ranks.tsv` and is contains the following:
 ```
