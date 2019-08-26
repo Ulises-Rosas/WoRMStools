@@ -31,9 +31,9 @@ cat species.txt
 ```
 
 ```
-Chiton latus
+Conus roosevelti
 Latirus hemphilli
-Odontesthes regia
+Favartia peasei
 Lolliguncula panameusis
 Pholoides tuberculata
 ```
