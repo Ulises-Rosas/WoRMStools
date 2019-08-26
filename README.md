@@ -18,7 +18,7 @@ Upon downloading this repository, unzip it and move into `WoRMStools` directory.
 python3 setup.py install
 ```
 
-Using `git`:
+Using `git` (Optional):
 ```Shell
 git clone https://github.com/Ulises-Rosas/WoRMStools.git
 cd WoRMStools
