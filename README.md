@@ -116,3 +116,25 @@ Cephalopoda	Loliginidae	Lolliguncula (Lolliguncula) panamensis	deprecated name: 
 Finally, this option can be used together with all above options.
 
 *\*While species that does not have an aphiaID can be either validated in order to get an aphiaID or simply skipped, it is highly recomendable to introduce a list of validated species (see how [here](https://github.com/Ulises-Rosas/WoRMStools#validate-names)).*
+
+### Usage within python3
+
+The way `WoRMStools` is used inside python3 resemble pretty as the usage in the terminal we have already seen:
+
+```python3
+# import worms class
+from WoRMStools.worms import Worms
+
+# get aphiaID
+Worms(taxon = 'Conus roosevelti').aphiaID
+
+# validate name
+Worms(taxon = 'Conus roosevelti').taxamatch()
+
+# get synonyms
+Worms(taxon = 'Favartia peasei').get_synonyms()
+
+# get an specific taxonomic rank
+Worms(taxon = 'Favartia peasei').get_rank(rank = 'Family')
+```
+
