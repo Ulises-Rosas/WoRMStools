@@ -119,7 +119,7 @@ Finally, this option can be used together with all above options.
 
 ### Usage within python3
 
-The way `WoRMStools` is used inside python3 resemble pretty as the usage in the terminal we have already seen:
+The way `WoRMStools` is used inside python3 resemble pretty much as the usage in the terminal we have already seen:
 
 ```python3
 # import worms class
