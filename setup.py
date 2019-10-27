@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import setuptools
 from distutils.core import setup
 
 setup(name="WoRMStools",
@@ -9,6 +10,7 @@ setup(name="WoRMStools",
       url='https://github.com/Ulises-Rosas/OBISdat',
       packages = ['WoRMStools'],
       package_dir = {'WoRMStools': 'src'},
-      scripts = ['src/worms.py']
+      scripts = ['src/worms.py'],
+      setup_requires=['wheel']
       )
 
