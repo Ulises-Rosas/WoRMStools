@@ -13,12 +13,11 @@ Software requierements:
 
 #### Installation
 
-By the moment, there's no need of further steps to install WoRMStools. You can just download this repository, unzip it and move into main directory in order to get access to executables. 
+By using `pip`:
 
-Using `git`:
-
-1. clone it: `git clone https://github.com/Ulises-Rosas/WoRMStools.git`
-2. move into:  `cd WoRMStools`
+```python
+pip install WoRMStools
+```
 
 ### AphiaID
 
@@ -39,7 +38,7 @@ Pholoides tuberculata
 ```
 We can obtain their aphiaIDs by running:
 ```Shell
-./src/worms.py species.txt -id
+worms.py species.txt -id
 ```
 By default worms.py uses its input to name all outputs, however this can be modified with `--out` option. Since we did not specify any output name, by default the output name is `species_worms_aphiaID.tsv` and is contains the following:
 
@@ -58,7 +57,7 @@ Currently accepted name according to WoRMS for each species can be obtained with
 
 Example:
 ```Shell
-./src/worms.py species.txt -val
+worms.py species.txt -val
 ```
 By default the output name is `species_worms_val.tsv` and is contains the following:
 ```
@@ -76,7 +75,7 @@ Synonyms of each species can be obtained with the option `-syn`. This option is 
 
 Example:
 ```Shell
-./src/worms.py species.txt -syn
+worms.py species.txt -syn
 ```
 By default the output name is `species_worms_syn.tsv` and is contains the following:
 ```
@@ -96,7 +95,7 @@ Different taxonomical categories can obtained with the option `--at`. This optio
 
 Example:
 ```Shell
-./src/worms.py species.txt --at Class Family
+worms.py species.txt --at Class Family
 ```
 By default the output name is `species_worms_ranks.tsv` and is contains the following:
 ```
@@ -111,3 +110,25 @@ Cephalopoda	Loliginidae	Lolliguncula (Lolliguncula) panamensis	deprecated name: 
 Finally, this option can be used together with all above options.
 
 *\*While species that does not have an aphiaID can be either validated in order to get an aphiaID or simply skipped, it is highly recomendable to introduce a list of validated species (see how [here](https://github.com/Ulises-Rosas/WoRMStools#validate-names)).*
+
+### Usage within python3
+
+The way `WoRMStools` is used inside python3 resemble pretty much as the usage in the terminal we have already seen:
+
+```python3
+# import worms class
+from WoRMStools.worms import Worms
+
+# get aphiaID
+Worms(taxon = 'Conus roosevelti').aphiaID
+
+# validate name
+Worms(taxon = 'Conus roosevelti').taxamatch()
+
+# get synonyms
+Worms(taxon = 'Favartia peasei').get_synonyms()
+
+# get an specific taxonomic rank
+Worms(taxon = 'Favartia peasei').get_rank(rank = 'Family')
+```
+
