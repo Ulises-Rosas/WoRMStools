@@ -19,6 +19,14 @@ By using `pip`:
 pip install WoRMStools
 ```
 
+Using `git` (Optional):
+
+```Shell
+git clone https://github.com/Ulises-Rosas/WoRMStools.git
+cd WoRMStools
+python3 setup.py install
+```
+
 ### AphiaID
 
 We can obtain the species ID which WoRMS database identify a given species (i.e. aphiaID). If this ID is not known, then species cannot be validated or continue with downstream procedures. Therefore, to know species aphiaID is an important step towards getting metadata inside WoRMS database.
