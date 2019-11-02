@@ -46,9 +46,9 @@ Pholoides tuberculata
 ```
 We can obtain their aphiaIDs by running:
 ```Shell
-worms.py species.txt -id
+worms species.txt -id
 ```
-By default worms.py uses its input to name all outputs, however this can be modified with `--out` option. Since we did not specify any output name, by default the output name is `species_worms_aphiaID.tsv` and is contains the following:
+By default `worms` uses its input to name all outputs, however this can be modified with `--out` option. Since we did not specify any output name, by default the output name is `species_worms_aphiaID.tsv` and is contains the following:
 
 ```Shell
 species	aphiaIDs	Obs
@@ -65,7 +65,7 @@ Currently accepted name according to WoRMS for each species can be obtained with
 
 Example:
 ```Shell
-worms.py species.txt -val
+worms species.txt -val
 ```
 By default the output name is `species_worms_val.tsv` and is contains the following:
 ```
@@ -83,7 +83,7 @@ Synonyms of each species can be obtained with the option `-syn`. This option is 
 
 Example:
 ```Shell
-worms.py species.txt -syn
+worms species.txt -syn
 ```
 By default the output name is `species_worms_syn.tsv` and is contains the following:
 ```
@@ -103,7 +103,7 @@ Different taxonomical categories can obtained with the option `--at`. This optio
 
 Example:
 ```Shell
-worms.py species.txt --at Class Family
+worms species.txt --at Class Family
 ```
 By default the output name is `species_worms_ranks.tsv` and is contains the following:
 ```

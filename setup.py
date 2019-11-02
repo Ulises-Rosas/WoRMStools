@@ -16,7 +16,15 @@ setup(name="WoRMStools",
       packages = ['WoRMStools'],
       package_dir = {'WoRMStools': 'src'},
       scripts = ['src/worms.py'],
+      entry_points={
+        'console_scripts': [
+            'worms = WoRMStools.worms:main'
+            ]
+      },
       setup_requires=['wheel'],
-      classifiers=['Programming Language :: Python :: 3']
-      )
+      classifiers=[
+            'Programming Language :: Python :: 3',
+            'License :: OSI Approved :: MIT License'
+            ]
 
+      )
