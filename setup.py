@@ -7,7 +7,7 @@ with open('README.md') as readme_file:
     readme = readme_file.read()
 
 setup(name="WoRMStools",
-      version='1.4',
+      version='1.3.1',
       long_description = readme,
       long_description_content_type='text/markdown',
       author='Ulises Rosas',
