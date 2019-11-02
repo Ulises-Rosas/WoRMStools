@@ -1,4 +1,6 @@
 [![DOI](https://zenodo.org/badge/204058054.svg)](https://zenodo.org/badge/latestdoi/204058054)
+[![pypi](https://img.shields.io/pypi/v/WoRMStools.svg)](https://pypi.python.org/pypi/WoRMStools)
+[![conda](https://anaconda.org/urosas/wormstools/badges/installer/conda.svg)](https://anaconda.org/urosas/wormstools)
 
 # WoRMStools
 
