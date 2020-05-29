@@ -18,7 +18,7 @@ Software requierements:
 By using `pip`:
 
 ```python
-pip install WoRMStools
+pip install wormstools
 ```
 
 Using `git` (Optional):
@@ -127,7 +127,7 @@ The way `WoRMStools` is used inside python3 resemble pretty much as the usage in
 
 ```python3
 # import worms class
-from WoRMStools.worms import Worms
+from wormstools.core_worms import Worms
 
 # get aphiaID
 Worms(taxon = 'Conus roosevelti').aphiaID
