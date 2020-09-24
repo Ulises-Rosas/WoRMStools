@@ -7,7 +7,7 @@ with open('README.md') as readme_file:
     readme = readme_file.read()
 
 setup(name="wormstools",
-      version='1.3.5',
+      version='1.3.6',
       description="Wrapper for WoRMS Rest API",
       long_description = readme,
       long_description_content_type='text/markdown',
