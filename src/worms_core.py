@@ -2,16 +2,19 @@
 
 # -*- coding: utf-8 -*- #
 import re
+import sys
 import json
 import time
 import urllib.error
 import urllib.request
 
 class Worms:
-    def __init__(self, taxon):
+    def __init__(self, taxon = None, taxa = None):
 
         if taxon is not None:
             self.taxon = taxon.replace(" ", "%20")
+
+        self.taxa = taxa
 
         ##...variables to fill in...##
         self.taxonomic_ranges = []
@@ -193,11 +196,23 @@ class Worms:
 
             return self.synonym_list
 
-    def AphiaRecordsByNames(self, listOfNames):
+    def AphiaRecordsByNames(self):
         # listOfNames = myspps['Acanthais callaoensis']
         # AphiaRecordsByNames_url = "http://www.marinespecies.org/rest/AphiaRecordsByNames?"
 
-        mynames = [i.strip() for i in listOfNames]
+        if not self.taxa:
+            sys.stderr.write("No list of taxa provided\n")
+            sys.stderr.flush()
+            exit()
+
+        mynames = [i.strip() for i in self.taxa]
+
+        if len(mynames) > 50:
+            sys.stderr.write("List with more than 50 entries\n")
+            sys.stderr.write("Consider split the input list\n")
+            sys.stderr.flush()
+            exit()
+
         header  = "&".join([ "scientificnames[]=" + i.replace(" ", "%20")  for i in mynames ])
         records_url = self.AphiaRecordsByNames_url + header
 
