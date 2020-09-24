@@ -2,6 +2,7 @@
 
 # -*- coding: utf-8 -*- #
 import re
+import json
 import time
 import urllib.error
 import urllib.request
@@ -9,20 +10,8 @@ import urllib.request
 class Worms:
     def __init__(self, taxon):
 
-        self.taxon = taxon.replace(" ", "%20")
-
-        aphiaID_url = "http://www.marinespecies.org/rest/AphiaIDByName/" + \
-                      self.taxon + \
-                      "?marine_only=false"
-
-        self.aphiaID = None
-        # make sure aphiaID will be available for downstream analyses
-        while self.aphiaID is None:
-            try:
-                self.aphiaID = urllib.request.urlopen(aphiaID_url).read().decode('utf-8')
-            except urllib.error.HTTPError:
-                time.sleep(0.5)
-                pass
+        if taxon is not None:
+            self.taxon = taxon.replace(" ", "%20")
 
         ##...variables to fill in...##
         self.taxonomic_ranges = []
@@ -31,13 +20,33 @@ class Worms:
         ##...variables to fill in...##
 
         ##...urls...##
-        self.records_url = "http://www.marinespecies.org/rest/AphiaChildrenByAphiaID/" + \
-                           self.aphiaID + \
-                           "?marine_only=false&offset=1"
         self.accepted_name = ""
         self.classfication_url = "http://www.marinespecies.org/rest/AphiaClassificationByAphiaID/"
         self.synonym_url = "http://www.marinespecies.org/rest/AphiaSynonymsByAphiaID/"
+        self.AphiaRecordsByNames_url = "http://www.marinespecies.org/rest/AphiaRecordsByNames?"
         ##...urls...##
+
+    @property
+    def aphiaID(self):
+        aphiaID_url = "http://www.marinespecies.org/rest/AphiaIDByName/" + \
+                      self.taxon + \
+                      "?marine_only=false"
+
+        aphiaID = None
+        # make sure aphiaID will be available for downstream analyses
+        while aphiaID is None:
+            try:
+                aphiaID = urllib.request.urlopen(aphiaID_url).read().decode('utf-8')
+            except urllib.error.HTTPError:
+                time.sleep(0.5)
+                pass
+            
+        return aphiaID
+    
+    @property
+    def records_url(self):
+        url = "http://www.marinespecies.org/rest/AphiaChildrenByAphiaID/"
+        return url + self.aphiaID + "?marine_only=false&offset=1"
 
     def get_children_names(self, till="Species"):
 
@@ -51,183 +60,28 @@ class Worms:
         ## in progress
         pass
 
-    def get_accepted_name(self):
-        """this function assumes that name is deprecated and tries to find epitopes
-        which is more similar with
-        """
-        # species with unaccepted names for testing:
-        # self = Worms("Paratrophon exsculptus")
-        # self =  Worms("Manta birostris")
-        # self = Worms("Aglaophamus peruana")
-        # self = Worms("Euzonus furciferus")
-        # self = Worms("Lubbockia squillimana")
-        # self = Worms("Doris fontainii")
-        # self = Worms("Synarmadillo tristani")
-        # self = Worms("Spondylus americanus")
-        # self = Worms("Felaniella parilis")
-
-        if len(self.aphiaID) == 0 or self.aphiaID == '-999':
-
-            species_binary = self.taxon.split("%20")
-
-            genus_id_url = "http://www.marinespecies.org/rest/AphiaIDByName/" + \
-                           species_binary[0] + \
-                           "?marine_only=false"
-
-            genus_id = urllib.request.urlopen(genus_id_url).read().decode('utf-8')
-
-            if genus_id == '-999' or genus_id == '':
-
-                self.accepted_name = ""
-                self.aphiaID = ""
-
-                return self.accepted_name
-
-            else:
-                complete_url = "http://www.marinespecies.org/aphia.php?p=taxdetails&id=" + genus_id
-
-                page = urllib.request.urlopen(complete_url).read().decode('utf-8')
-
-                # line which contains span
-                lines = re.findall("<span.*>" + species_binary[0] + "[\(A-Za-z\) ]{0,} [a-z]+<.*", page)
-
-                # it takes the first species pattern
-                epitopes0 = []
-
-                for ep in lines:
-                    tmp = re.findall("<i>[A-Z][a-z]+[\(\)A-Za-z ]{0,} [a-z]+</i>", ep)
-                    epitopes0.append(tmp)
-
-                epitopes = [i[0].split(" ")[-1].replace("</i>", "") for i in list(filter(None, epitopes0))]
-
-                def get_pieces(string, amplitude):
-
-                    pieces = [string[i:i + amplitude] for i in range(len(list(string)))]
-
-                    trimmed_pieces = [i for i in pieces if len(i) > amplitude - 1]
-
-                    return trimmed_pieces
-
-                for index in range(len(list(species_binary[1])) - 1):
-                    # pieces by the length of index, e.g.,
-                    # if the string is "abc" and index = 0, then ['a', 'b', 'c']
-                    # if the string is "abc" and index = 1, then ['ab', 'bc']
-
-                    # index =0
-                    # print(index)
-
-                    a = get_pieces(species_binary[1], index + 1)
-
-                    lengths = []
-
-                    for string in epitopes:
-
-                        matches = [re.findall(i, string) for i in set(a)]
-                        # n1 is the number of matches that pieces `a` have with a string
-                        # d1 is the number of choices available for matches from a string
-
-                        if len(get_pieces(string, index + 1)) == 0:
-                            # if a, which are pieces of `species_binary[1]`, is larger than
-                            # the string, you will always have zero matches. That is, `n1` will
-                            # be always zero. So, it does not care what value takes d1. In this
-                            # case it will take 1 so as to avoid emerging conflicts from division
-                            d1 = 1
-
-                        else:
-                            d1 = len(get_pieces(string, index + 1))
-                        # number of matches. Since inside sum function there is just a list of lists,
-                        # sum only counts crowded lists,i.e., number of matches
-                        n1 = sum([len(c) for c in matches])
-
-                        # since it can appear a large string with multiple matches from just a part of it,
-                        # n1/d1 is the number of matches between "a", pieced `species_binary[1]` and
-                        # the epitope (string) (e.i. a --> epitope) divided by the number of
-                        # possible substrings (pieces) of an epitope (string) of length "index + 1".
-                        # Just a measure of quality in matches. Coverage of "a" over an apitope
-
-                        # d2 is the number of pieces of `a`.
-                        # n2 is the number of pieces of "a" that did not have any match with epitope (string)
-                        # therefore, 1 - n2/d2 is a measure of coverage of epitope matches over "a"
-                        d2 = len(set(a))
-                        n2 = len(set(a) - set(
-                            ["".join(set(b)) for b in matches if len(b) > 0]))  # len(b) filter just matches
-
-                        # render index
-                        lengths.append(n1 / d1 + 1 - n2 / d2)
-
-                    check_max_epitopes = []
-                    # check if that max value of `length` just belongs to one single epitopes
-                    for d in range(len(lengths)):
-                        if lengths[d] == max(lengths):
-                            check_max_epitopes.append(epitopes[d])
-
-                    # the loop increase the word size till there is only one single max index
-                    if len(set(check_max_epitopes)) == 1:
-
-                        page_line = lines[lengths.index(max(lengths))]
-                        try:
-
-                            self.accepted_name = re.findall("<i>[A-Z][a-z]+ [a-z]+</i>", page_line)[-1].replace("<i>","").replace("</i>", "")
-                            self.aphiaID = re.findall("aphia.php\?p=taxdetails&id=[0-9]+", page_line)[0].replace("aphia.php?p=taxdetails&id=", "")
-                        except IndexError:
-
-                            self.accepted_name = ""
-                            self.aphiaID = ""
-                        break
-
-            return self.accepted_name
-
-        else:
-            complete_url = "http://www.marinespecies.org/aphia.php?p=taxdetails&id=" + self.aphiaID
-
-            page = None
-            # make sure aphiaID will be available for downstream analyses
-            while page is None:
-                try:
-                    page = urllib.request.urlopen(complete_url).read().decode('utf-8')
-                except urllib.error.HTTPError:
-                    pass
-
-            if len(re.findall(">unaccepted<", page)) == 1:
-
-                # get down till species name line:
-                line = re.findall('id="AcceptedName".*\n.*\n.*\n.*\n.*', page)[0]
-
-                # previously tested:
-                # line = re.findall("p=taxdetails&id=(?!" + self.aphiaID + ").*<i>[A-Z][a-z]+ [a-z]+</i>", page)[0]
-                # line = re.findall(">Accepted Name<.*p=taxdetails&id=[0-9]+.*></i><i>[A-Z][a-z]+ [a-z ]{1,}</i>",
-                #           page.replace("\n", ""))[0]
-                # self.accepted_name = re.sub(".*</i><i>(.*)</i>", "\\1", line)
-
-                self.accepted_name = re.sub(".*</i><i>(.*)</i>.*", "\\1", line.replace("\n", ""))
-
-                aphiaID_url = "http://www.marinespecies.org/rest/AphiaIDByName/" + \
-                              re.sub(" ", "%20", self.accepted_name) + "?marine_only=false"
-
-                self.aphiaID = None
-                # make sure aphiaID will be available for downstream analyses
-                while self.aphiaID is None:
-                    try:
-                        self.aphiaID = urllib.request.urlopen(aphiaID_url).read().decode('utf-8')
-                    except urllib.error.HTTPError:
-                        pass
-
-                return self.accepted_name
-
-            else:
-                self.accepted_name = self.taxon.replace("%20", " ")
-
-                return self.accepted_name
-
     def taxamatch(self):
-        # self = Worms("Schizodon jacuiensis").taxamatch()
-        # self = Worms("Theria rupicapraria")
-        # self.accepted_name
-        # self = Worms("Lubbockia squillimana")
-        # self.taxamatch()
-        # self = Worms("Synarmadillo tristani")
-        # self = Worms("Aega perualis")
+        """        
+        species with unaccepted names for testing:
+            self = Worms("Paratrophon exsculptus")
+            self =  Worms("Manta birostris")
+            self = Worms("Aglaophamus peruana")
+            self = Worms("Euzonus furciferus")
+            self = Worms("Lubbockia squillimana")
+            self = Worms("Doris fontainii")
+            self = Worms("Synarmadillo tristani")
+            self = Worms("Spondylus americanus")
+            self = Worms("Felaniella parilis")
 
+
+            self = Worms("Schizodon jacuiensis").taxamatch()
+            self = Worms("Theria rupicapraria")
+            self.accepted_name
+            self = Worms("Lubbockia squillimana")
+            self.taxamatch()
+            self = Worms("Synarmadillo tristani")
+            self = Worms("Aega perualis")
+        """
         spps = re.sub("\\(.+\\)", "", self.taxon).lower()
         spps = re.sub("[ ]{2,}", " ", spps)
         # spps = self.taxon
@@ -297,10 +151,10 @@ class Worms:
 
         rankMatch = re.sub('.*"rank":"' +
                            spell[0] +
-                           '","scientificname":"([A-Za-z\[\] ]+)".*',
+                           '","scientificname":"([A-Za-z\\[\\] ]+)".*',
                            "\\1", self.classification_page)
 
-        if re.findall("\[unassigned\]", rankMatch):
+        if re.findall("\\[unassigned\\]", rankMatch):
             return 'unassigned'
         else:
             return rankMatch
@@ -338,3 +192,35 @@ class Worms:
             self.synonym_list = [re.sub('"scientificname":"([A-Za-z ]+)"', "\\1", i) for i in pre_syn]
 
             return self.synonym_list
+
+    def AphiaRecordsByNames(self, listOfNames):
+        # listOfNames = myspps['Acanthais callaoensis']
+        # AphiaRecordsByNames_url = "http://www.marinespecies.org/rest/AphiaRecordsByNames?"
+
+        mynames = [i.strip() for i in listOfNames]
+        header  = "&".join([ "scientificnames[]=" + i.replace(" ", "%20")  for i in mynames ])
+        records_url = self.AphiaRecordsByNames_url + header
+
+        records = None
+        while records is None:
+            try:
+                records  = urllib.request.urlopen(records_url).read().decode('utf-8')
+
+            except urllib.error.HTTPError:
+                time.sleep(0.5)
+                pass
+
+        myresults = filter(None, json.loads(records))
+
+        out = {}
+        for node in myresults:
+            for names in node:
+                synname = names['scientificname']
+                # print(synname)
+                for start in mynames:
+                    if synname == start:
+                        if not out.__contains__(start):
+                            out[start] = names['authority']
+
+        return out
+
