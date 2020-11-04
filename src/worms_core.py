@@ -196,7 +196,7 @@ class Worms:
 
             return self.synonym_list
 
-    def AphiaRecordsByNames(self):
+    def AphiaRecordsByNames(self, quiet = False):
         # listOfNames = myspps['Acanthais callaoensis']
         # AphiaRecordsByNames_url = "http://www.marinespecies.org/rest/AphiaRecordsByNames?"
 
@@ -205,37 +205,52 @@ class Worms:
             sys.stderr.flush()
             exit()
 
-        mynames = [i.strip() for i in self.taxa]
+        # if len(mynames) > 50:
+        #     sys.stderr.write("List with more than 50 entries\n")
+        #     sys.stderr.write("Consider split the input list\n")
+        #     sys.stderr.flush()
+        #     exit()
 
-        if len(mynames) > 50:
-            sys.stderr.write("List with more than 50 entries\n")
-            sys.stderr.write("Consider split the input list\n")
-            sys.stderr.flush()
-            exit()
+        offset = 50
+        superout = {}
 
-        header  = "&".join([ "scientificnames[]=" + i.replace(" ", "%20")  for i in mynames ])
-        records_url = self.AphiaRecordsByNames_url + header
+        for i in range(0,len(self.taxa), offset):
+            mynames = [i.strip() for i in self.taxa[i:i + offset]]
 
-        records = None
-        while records is None:
-            try:
-                records  = urllib.request.urlopen(records_url).read().decode('utf-8')
+            if not quiet:
+                for qna in mynames:
+                    sys.stdout.write("Processing: %s\n" % qna)
+                    sys.stdout.flush()
 
-            except urllib.error.HTTPError:
-                time.sleep(0.5)
-                pass
+            header  = "&".join([ "scientificnames[]=" + i.replace(" ", "%20")  for i in mynames ])
+            records_url = self.AphiaRecordsByNames_url + header
 
-        myresults = filter(None, json.loads(records))
+            records = None
+            while records is None:
+                try:
+                    records  = urllib.request.urlopen(records_url).read().decode('utf-8')
 
-        out = {}
-        for node in myresults:
-            for names in node:
-                synname = names['scientificname']
-                # print(synname)
-                for start in mynames:
-                    if synname == start:
-                        if not out.__contains__(start):
-                            out[start] = names['authority']
+                except urllib.error.HTTPError:
+                    time.sleep(0.5)
+                    pass
 
-        return out
+            myresults = list(filter(None, json.loads(records))) if records else []
+
+            if not myresults:
+                continue
+
+            out = {}
+            for node in myresults:
+                for names in node:
+                    synname = names['scientificname']
+                    # print(synname)
+                    for start in mynames:
+                        if synname == start:
+                            if not out.__contains__(start):
+                                out[start] = names['authority']
+
+            superout.update(out)
+            time.sleep(0.5)
+
+        return superout
 
