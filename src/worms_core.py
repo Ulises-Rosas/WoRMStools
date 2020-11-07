@@ -29,8 +29,7 @@ class Worms:
         self.AphiaRecordsByNames_url = "http://www.marinespecies.org/rest/AphiaRecordsByNames?"
         ##...urls...##
 
-    @property
-    def aphiaID(self):
+        ##...aphiaID...##
         aphiaID_url = "http://www.marinespecies.org/rest/AphiaIDByName/" + \
                       self.taxon + \
                       "?marine_only=false"
@@ -43,8 +42,9 @@ class Worms:
             except urllib.error.HTTPError:
                 time.sleep(0.5)
                 pass
-            
-        return aphiaID
+
+        self.aphiaID = aphiaID
+        ##...aphiaID...##
     
     @property
     def records_url(self):
@@ -254,3 +254,7 @@ class Worms:
 
         return superout
 
+
+
+
+# Worms(taxon='Latirus hemphilli').aphiaID
